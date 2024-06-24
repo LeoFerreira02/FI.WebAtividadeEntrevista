@@ -1,0 +1,9 @@
+﻿CREATE PROCEDURE FI_SP_DelBene
+    @IdCliente BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM BENEFICIARIOS
+    WHERE IdCliente = @IdCliente;
+END

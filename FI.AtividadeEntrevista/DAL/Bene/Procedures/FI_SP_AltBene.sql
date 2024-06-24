@@ -1,0 +1,13 @@
+﻿ CREATE PROCEDURE FI_SP_AltBene
+    @Id BIGINT,
+    @Nome NVARCHAR(100),
+    @CPF NVARCHAR(11)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE BENEFICIARIOS
+    SET Nome = @Nome,
+        CPF = @CPF
+    WHERE Id = @Id;
+END

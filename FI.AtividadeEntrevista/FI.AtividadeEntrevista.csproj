@@ -42,13 +42,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BLL\BoBene.cs" />
     <Compile Include="BLL\BoCliente.cs" />
+    <Compile Include="DAL\Bene\DaoBene.cs" />
     <Compile Include="DAL\Clientes\DaoCliente.cs" />
     <Compile Include="DAL\Padrao\FI.AcessoDados.cs" />
+    <Compile Include="DML\Bene.cs" />
     <Compile Include="DML\Cliente.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DAL\Bene\Procedures\FI_SP_AltBene.sql" />
+    <Content Include="DAL\Bene\Procedures\FI_SP_ListBene.sql" />
+    <Content Include="DAL\Bene\Procedures\FI_SP_DelBene.sql" />
+    <Content Include="DAL\Bene\Procedures\FI_SP_IncBene.sql" />
     <Content Include="DAL\Clientes\Procedures\FI_SP_AltCliente.sql" />
     <Content Include="DAL\Clientes\Procedures\FI_SP_ConsCliente.sql" />
     <Content Include="DAL\Clientes\Procedures\FI_SP_DelCliente.sql" />

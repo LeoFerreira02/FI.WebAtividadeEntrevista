@@ -1,0 +1,13 @@
+﻿CREATE PROCEDURE FI_SP_IncBene
+    @IdCliente BIGINT,
+    @Nome NVARCHAR(100),
+    @CPF NVARCHAR(11)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO BENEFICIARIOS (IdCliente, Nome, CPF)
+    VALUES (@IdCliente, @Nome, @CPF);
+
+    SELECT SCOPE_IDENTITY() AS Id;
+END

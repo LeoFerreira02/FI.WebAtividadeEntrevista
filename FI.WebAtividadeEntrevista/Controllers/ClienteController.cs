@@ -7,6 +7,8 @@ using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
 using System.Reflection;
+using System.Web.UI.WebControls;
+using Newtonsoft.Json;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -55,34 +57,31 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Incluir(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
+            BoBene boBene = new BoBene();
 
-            if (!this.ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                List<string> erros = (from item in ModelState.Values
-                                      from error in item.Errors
-                                      select error.ErrorMessage).ToList();
+                List<string> erros = new List<string>();
+                foreach (var modelStateValue in ModelState.Values)
+                {
+                    foreach (var error in modelStateValue.Errors)
+                    {
+                        erros.Add(error.ErrorMessage);
+                    }
+                }
 
                 Response.StatusCode = 400;
-                return Json(string.Join(Environment.NewLine, erros));
+                return Json(string.Join(", ", erros));
             }
             else
             {
-
-                // Validar CPF e apresentar mensagem de erro.
                 if (!IsValidCpf(model, out var error))
                 {
-                    // Se o CPF não for válido, retorna a mensagem de erro específica
                     Response.StatusCode = 400;
-                    return Json(string.Join(Environment.NewLine, error));
+                    return Json(error);
                 }
 
-                // Validação para reforçar o frontEnd (usado apenas quando o usuário tentar "burlar" a validação original. (required));
-                if (string.IsNullOrEmpty(model.CPF)) return Json("Campo CPF é Obrigatório");
-
-                if (bo.VerificarExistencia(model.CPF)) return Json("CPF Já existente");
-
-                if (!bo.IsCpf(model.CPF)) return Json("CPF Inválido");
-
+                // Incluir cliente
                 model.Id = bo.Incluir(new Cliente()
                 {
                     CEP = model.CEP,
@@ -94,10 +93,16 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
                     Telefone = model.Telefone,
-                    // Removendo máscara para salvar no banco. (Evitar de passar o limite de 11 char do campo)
                     CPF = model.CPF.Replace(".", "").Replace("-", "")
                 });
 
+                // Vincular beneficiários ao cliente
+                if (!string.IsNullOrEmpty(model.BeneficiariosJson))
+                {
+                    List<Bene> beneficiarios = JsonConvert.DeserializeObject<List<Bene>>(model.BeneficiariosJson);
+
+                    boBene.IncluirBeneficiarios(model.Id, beneficiarios);
+                }
 
                 return Json("Cadastro efetuado com sucesso");
             }
@@ -106,33 +111,30 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
-            BoCliente bo = new BoCliente();
+            BoCliente boCliente = new BoCliente();
+            BoBene boBene = new BoBene();
 
-            if (!this.ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                List<string> erros = (from item in ModelState.Values
-                                      from error in item.Errors
-                                      select error.ErrorMessage).ToList();
+                List<string> erros = ModelState.Values.SelectMany(item => item.Errors)
+                                                      .Select(error => error.ErrorMessage)
+                                                      .ToList();
 
                 Response.StatusCode = 400;
                 return Json(string.Join(Environment.NewLine, erros));
             }
             else
             {
-                // CPFAnterior é o CPF que está no campo na abertura da tela (Método GET)
                 string cpfAnterior = TempData["CPFAnterior"] as string;
 
-                // Mensagem do candidato: sei que geralmente o campo de CPF não pode ser alterado, mas coloquei a validação de "CPF anterior" para não dar erro de "CPF Existente".
-
-                // Validar CPF e apresentar mensagem de erro.
+                // Validar CPF
                 if (cpfAnterior != model.CPF && !IsValidCpf(model, out var error))
                 {
-                    // Se o CPF não for válido, retorna a mensagem de erro específica
                     Response.StatusCode = 400;
                     return Json(string.Join(Environment.NewLine, error));
                 }
 
-                bo.Alterar(new Cliente()
+                boCliente.Alterar(new Cliente()
                 {
                     Id = model.Id,
                     CEP = model.CEP,
@@ -144,9 +146,22 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
                     Telefone = model.Telefone,
-                    // Removendo máscara para salvar no banco. (Evitar de passar o limite de 11 char do campo)
                     CPF = model.CPF.Replace(".", "").Replace("-", "")
                 });
+
+
+
+                // Vincular beneficiários ao cliente
+                if (model.Beneficiarios != null && model.Beneficiarios.Any())
+                {
+                    List<Bene> beneficiarios = model.Beneficiarios.Select(b => new Bene
+                    {
+                        Nome = b.Nome,
+                        CPF = b.CPF.Replace(".", "").Replace("-", "")
+                    }).ToList();
+
+                    boBene.AlterarBeneficiarios(model.Id, beneficiarios);
+                }
 
                 return Json("Cadastro alterado com sucesso");
             }
@@ -173,7 +188,7 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
                     Telefone = cliente.Telefone,
-                    // Colocando máscara para facilitar a visualização do usuário.
+                    // Coloquei máscara para facilitar a visualização do usuário.
                     CPF = cliente.CPF.Insert(3, ".").Insert(7, ".").Insert(11, "-"),
                 };
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using FI.AtividadeEntrevista.DML;
 
 namespace WebAtividadeEntrevista.Models
 {
@@ -72,5 +73,8 @@ namespace WebAtividadeEntrevista.Models
         /// </summary>
         public string CPF { get; set; }
 
+        public List<BeneModel> Beneficiarios { get; set; }
+
+        public string BeneficiariosJson { get; set; }
     }    
 }
