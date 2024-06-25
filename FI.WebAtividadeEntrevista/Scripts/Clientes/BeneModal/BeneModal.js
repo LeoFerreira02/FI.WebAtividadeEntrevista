@@ -2,7 +2,6 @@
 
     $('#ModalCPF').mask('000.000.000-00');
 
-    // Função para adicionar nova linha na tabela de beneficiários
     $('#btnIncluir').click(function () {
         var cpf = $('#ModalCPF').val().trim();
         var nome = $('#ModalNome').val().trim();
@@ -23,7 +22,22 @@
             return;
         }
 
+        var novaLinha = adicionarBeneficiario(cpf, nome);
+        $('#tabelaBeneficiarios tbody').append(novaLinha);
+
+        $('#ModalCPF').val('');
+        $('#ModalNome').val('');
+    });
+
+    function adicionarBeneficiario(cpf, nome) {
+        var idx = $('#tabelaBeneficiarios tbody tr').length;
+
         var novaLinha = '<tr>' +
+            '<td style="display: none;">' +
+            '<input name="Beneficiarios[' + idx + '].ID" value="0"/>' +
+            '<input name="Beneficiarios[' + idx + '].CPF" value="' + cpf + '"/>' +
+            '<input name="Beneficiarios[' + idx + '].Nome" value="' + nome + '"/>' +
+            '</td>' +
             '<td>' + cpf + '</td>' +
             '<td>' + nome + '</td>' +
             '<td class="text-right">' +
@@ -34,17 +48,15 @@
             '</td>' +
             '</tr>';
 
-        $('#tabelaBeneficiarios tbody').append(novaLinha);
-
-        $('#ModalCPF').val('');
-        $('#ModalNome').val('');
-    });
+        return novaLinha;
+    }
 
     // Função para verificar se o CPF já existe na tabela
     function cpfJaExisteNaTabela(cpf) {
         var existe = false;
         $('#tabelaBeneficiarios tbody').find('tr').each(function () {
-            var cpfNaTabela = $(this).find('td:eq(0)').text().trim();
+            // idx nao comeca do (0) porque ao criar os dados dinamicamente, o campo de CPF passa a ser o idx(1).
+            var cpfNaTabela = $(this).find('td:eq(1)').text().trim();
             if (cpfNaTabela === cpf) {
                 existe = true;
                 return false;
@@ -58,11 +70,11 @@
         $(this).closest('tr').remove();
     });
 
-    // Função para preencher o modal de edição e abrir o modal
+    // Preenchendo e abrindo a modal de edição.
     $('#tabelaBeneficiarios').on('click', '.btn-alterar', function () {
         var row = $(this).closest('tr');
-        var cpf = row.find('td:eq(0)').text().trim();
-        var nome = row.find('td:eq(1)').text().trim();
+        var cpf = row.find('td:eq(1)').text().trim();
+        var nome = row.find('td:eq(2)').text().trim();
 
         $('#EditCPF').val(cpf);
         $('#EditNome').val(nome);
@@ -86,9 +98,11 @@
         }
 
         // Atualiza os dados na tabela de beneficiários
+
+        // idx nao comeca do (0) porque ao criar os dados dinamicamente, o campo de CPF passa a ser o idx(1).
         $('#tabelaBeneficiarios tbody').find('tr').each(function () {
-            if ($(this).find('td:eq(0)').text().trim() === cpf) {
-                $(this).find('td:eq(1)').text(nome);
+            if ($(this).find('td:eq(1)').text().trim() === cpf) {
+                $(this).find('td:eq(2)').text(nome);
             }
         });
 

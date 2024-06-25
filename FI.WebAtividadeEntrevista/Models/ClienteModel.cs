@@ -69,12 +69,10 @@ namespace WebAtividadeEntrevista.Models
         public string Telefone { get; set; }
         
         /// <summary>
-        /// Telefone
+        /// CPF
         /// </summary>
         public string CPF { get; set; }
 
         public List<BeneModel> Beneficiarios { get; set; }
-
-        public string BeneficiariosJson { get; set; }
     }    
 }

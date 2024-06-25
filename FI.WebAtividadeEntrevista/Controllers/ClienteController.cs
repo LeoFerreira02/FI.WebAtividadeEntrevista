@@ -29,7 +29,7 @@ namespace WebAtividadeEntrevista.Controllers
         {
             error = string.Empty;
             BoCliente bo = new BoCliente();
-            var unMaskedCpf = model.CPF.Replace(".", "").Replace("-", "");
+            var unMaskedCpf = !string.IsNullOrEmpty(model.CPF) ? model.CPF.Replace(".", "").Replace("-", "") ?? model.CPF : model.CPF;
 
             // Validação para reforçar o frontEnd (usado apenas quando o usuário tentar "burlar" a validação original. (required));
             if (string.IsNullOrEmpty(unMaskedCpf))
@@ -50,7 +50,7 @@ namespace WebAtividadeEntrevista.Controllers
                 return false;
             }
             
-            return true;
+           return true;
         }
 
         [HttpPost]
@@ -96,10 +96,16 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = model.CPF.Replace(".", "").Replace("-", "")
                 });
 
-                // Vincular beneficiários ao cliente
-                if (!string.IsNullOrEmpty(model.BeneficiariosJson))
+                if (model.Beneficiarios != null && model.Beneficiarios.Any())
                 {
-                    List<Bene> beneficiarios = JsonConvert.DeserializeObject<List<Bene>>(model.BeneficiariosJson);
+                    var id = 0;
+                    List<Bene> beneficiarios = model.Beneficiarios.Select(b => new Bene
+                    {
+                        IdCliente = model.Id,
+                        Id = id++,
+                        Nome = b.Nome,
+                        CPF = b.CPF.Replace(".", "").Replace("-", "")
+                    }).ToList();
 
                     boBene.IncluirBeneficiarios(model.Id, beneficiarios);
                 }
@@ -146,21 +152,25 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
                     Telefone = model.Telefone,
-                    CPF = model.CPF.Replace(".", "").Replace("-", "")
+                    CPF = model.CPF.Replace(".", "").Replace("-", ""),
                 });
 
-
-
                 // Vincular beneficiários ao cliente
+                // Decidi excluir tudo do banco e redefinir ids e registros por simplicidades. Se os IDs nao podem ser perdidos, este
+                // processo precisa ser redesenhado/reescrito.
+
                 if (model.Beneficiarios != null && model.Beneficiarios.Any())
                 {
+                    var id = 0;
                     List<Bene> beneficiarios = model.Beneficiarios.Select(b => new Bene
                     {
+                        IdCliente = model.Id,
+                        Id = id++,
                         Nome = b.Nome,
                         CPF = b.CPF.Replace(".", "").Replace("-", "")
                     }).ToList();
 
-                    boBene.AlterarBeneficiarios(model.Id, beneficiarios);
+                    boBene.IncluirBeneficiarios(model.Id, beneficiarios);
                 }
 
                 return Json("Cadastro alterado com sucesso");
@@ -222,7 +232,7 @@ namespace WebAtividadeEntrevista.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { Result = "ERROR", Message = ex.Message });
+                return Json(new { Result = "ERROR", ex.Message });
             }
         }
     }

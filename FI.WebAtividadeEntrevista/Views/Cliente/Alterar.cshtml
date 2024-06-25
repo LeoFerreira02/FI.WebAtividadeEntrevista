@@ -4,8 +4,6 @@
 }
 @section scripts{
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-
-    <!-- Referência ao novo arquivo JavaScript -->
     <script src="~/Scripts/Clientes/BeneModal/BeneModal.js"></script>
 
     <script>
@@ -16,36 +14,6 @@
         var urlPost = '@Url.Action("Alterar", "Cliente", new { area = "" })';
         var obj = @Html.Raw(Json.Encode(Model));
         var urlRetorno = '@Url.Action("Index", "Cliente", new { area = "" })';
-
-
-        function enviarDados(todos_listabene){
-               $.ajax({
-                  method: "POST",
-                  url: '@Url.Action("Alterar", "Cliente")',
-                  data: JSON.stringify(todos_listabene)
-               });
-            }
-
-
-        $("#btn-enviar").click(function () {
-            var todos_litabene = [];
-
-            // Varrendo todos os itens inseridos (olha a vassoura!)
-            $('.item').each(function () {
-
-                // Montando objeto que possui as mesmas propriedades do objeto C# do Controller.
-                var entidade_listabene = {
-                    cpf: $(this).children()[0].innerText,
-                    nome: $(this).children()[1].innerText,
-                };
-
-                // Adicionando objeto a lista.
-                todos_litabene.push(entidade_listabene);
-            });
-
-            // Após validações, chame a função que possui o Ajax para enviar a lista obtida.
-            enviarDados(todos_litabene);
-        });
 
     </script>
     @Scripts.Render("~/bundles/altClientes")

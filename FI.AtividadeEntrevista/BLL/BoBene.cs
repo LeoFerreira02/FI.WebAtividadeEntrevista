@@ -17,28 +17,6 @@ namespace FI.AtividadeEntrevista.BLL
         }
 
         /// <summary>
-        /// Altera beneficiários de um cliente
-        /// </summary>
-        /// <param name="idCliente">ID do cliente cujos beneficiários serão alterados</param>
-        /// <param name="beneficiarios">Lista de beneficiários atualizados</param>
-        public void AlterarBeneficiarios(long idCliente, IEnumerable<DML.Bene> beneficiarios)
-        {
-            DaoBene daoBene = new DaoBene();
-            daoBene.AlterarBeneficiarios(idCliente, beneficiarios);
-        }
-
-        /// <summary>
-        /// Lista beneficiários de um cliente
-        /// </summary>
-        /// <param name="idCliente">ID do cliente cujos beneficiários serão listados</param>
-        /// <returns>Lista de beneficiários do cliente</returns>
-        public List<DML.Bene> ListarBeneficiarios(long idCliente)
-        {
-            DaoBene daoBene = new DaoBene();
-            return daoBene.ListarBeneficiarios(idCliente);
-        }
-
-        /// <summary>
         /// Exclui todos os beneficiários de um cliente
         /// </summary>
         /// <param name="idCliente">ID do cliente cujos beneficiários serão excluídos</param>
